@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Expense Tracker (Any Month)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#3b82f6; --muted:#94a3b8; --glass: rgba(255,255,255,0.03);
+      --success:#10b981; --danger:#ef4444; --radius:14px; --gap:12px; --maxw:720px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial; background:linear-gradient(180deg,#071024 0%, #07162a 100%); color:#e6eef8; -webkit-font-smoothing:antialiased;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+    }
+    .app{width:100%; max-width:var(--maxw);} 
+    header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .logo{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(11,20,32,0.6)}
+    .logo svg{width:28px;height:28px}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .card{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:0 6px 30px rgba(2,6,23,0.6);}
+    .row{display:flex;gap:var(--gap)}
+    .col{flex:1}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    select,input,textarea{width:100%;padding:10px;border-radius:10px;border:0;background:var(--glass);color:inherit;font-size:15px}
+    .actions{display:flex;gap:8px;margin-top:12px}
+    button{padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:white;font-weight:600;cursor:pointer}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);}
+    .summary{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+    .total{font-size:20px;font-weight:700}
+    .list{margin-top:12px;display:grid;gap:10px}
+    .entry{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));}
+    .entry .meta{display:flex;flex-direction:column}
+    .entry .meta .cat{font-weight:700}
+    .entry .meta .desc{font-size:12px;color:var(--muted)}
+    .small{font-size:12px;color:var(--muted)}
+    .pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700}
+    .controls{display:flex;gap:8px}
+    .icon-btn{background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer;color:var(--muted)}
+    footer{margin-top:14px;color:var(--muted);font-size:12px;text-align:center}
+    @media (max-width:520px){.row{flex-direction:column}.logo{width:46px;height:46px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo" aria-hidden>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v18" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M5 10c1.8-2.6 4.9-4 7-4s5.2 1.4 7 4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg>
+      </div>
+      <div>
+        <h1>💰 Expense Tracker</h1>
+        <p class="lead">Track any month — mobile first, export to Excel</p>
+      </div>
+    </header>
+
+    <div class="card" id="appCard">
+      <div class="row">
+        <div class="col">
+          <label for="monthSelect">Month</label>
+          <input id="monthSelect" type="month">
+        </div>
+        <div class="col">
+          <label for="dateInput">Date</label>
+          <input id="dateInput" type="date">
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <label for="category">Category</label>
+      <select id="category">
+        <option value="Rent">Rent</option>
+        <option value="Grocery">Grocery</option>
+        <option value="Auto Insurance">Auto Insurance</option>
+        <option value="Utilities">Utilities</option>
+        <option value="Transport">Transport</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <div style="height:8px"></div>
+      <div class="row">
+        <div class="col">
+          <label for="amount">Amount (USD)</label>
+          <input id="amount" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="col">
+          <label for="desc">Description (optional)</label>
+          <input id="desc" type="text" placeholder="e.g., Groceries from Walmart">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="saveBtn">Save Expense</button>
+        <button class="secondary" id="clearBtn">Clear Inputs</button>
+        <button class="secondary" id="downloadBtn">📤 Download Excel</button>
+      </div>
+
+      <div class="summary" style="margin-top:10px">
+        <div>
+          <div class="small">Selected month</div>
+          <div id="selectedMonth" class="pill">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="small">Total</div>
+          <div id="total" class="total">$0.00</div>
+        </div>
+      </div>
+
+      <div class="list" id="list"></div>
+
+      <footer>
+        Tip: Save this page to your Android Home screen for app-like access.<br>Data is stored locally in your browser.
+      </footer>
+    </div>
+  </div>
+
+  <!-- SheetJS (for Excel export) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    // Mobile-friendly expense tracker with localStorage per month
+    const monthInput = document.getElementById('monthSelect');
+    const dateInput = document.getElementById('dateInput');
+    const category = document.getElementById('category');
+    const amount = document.getElementById('amount');
+    const desc = document.getElementById('desc');
+    const saveBtn = document.getElementById('saveBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const listEl = document.getElementById('list');
+    const totalEl = document.getElementById('total');
+    const selectedMonthEl = document.getElementById('selectedMonth');
+
+    // Helpers
+    function fmtMoney(v){return '$'+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+    function keyFor(monthY){return 'expenses_'+monthY} // e.g. expenses_2025-11
+
+    // Init: set month to current month and date to today
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = (now.getMonth()+1).toString().padStart(2,'0');
+    monthInput.value = `${y}-${m}`;
+    dateInput.value = now.toISOString().slice(0,10);
+
+    // Load & render
+    function loadEntries(){
+      const k = keyFor(monthInput.value);
+      selectedMonthEl.textContent = monthInput.value || '—';
+      let raw = localStorage.getItem(k);
+      let entries = raw ? JSON.parse(raw) : [];
+      render(entries);
+      return entries;
+    }
+
+    function saveEntries(entries){
+      const k = keyFor(monthInput.value);
+      localStorage.setItem(k, JSON.stringify(entries));
+    }
+
+    function addEntry(e){
+      const entries = loadEntries();
+      entries.push(e);
+      saveEntries(entries);
+      render(entries);
+    }
+
+    function removeEntry(index){
+      const entries = loadEntries();
+      entries.splice(index,1);
+      saveEntries(entries);
+      render(entries);
+    }
+
+    function render(entries){
+      listEl.innerHTML='';
+      let total = 0;
+      entries.forEach((it,i)=>{
+        total += Number(it.amount);
+        const div = document.createElement('div'); div.className='entry';
+        const meta = document.createElement('div'); meta.className='meta';
+        const cat = document.createElement('div'); cat.className='cat'; cat.textContent = `${it.category} — ${fmtMoney(it.amount)}`;
+        const descEl = document.createElement('div'); descEl.className='desc'; descEl.textContent = `${it.date} ${it.desc? ' · '+it.desc:''}`;
+        meta.appendChild(cat); meta.appendChild(descEl);
+        const controls = document.createElement('div'); controls.className='controls';
+        const del = document.createElement('button'); del.className='icon-btn'; del.title='Delete'; del.innerHTML='🗑️'; del.onclick = ()=>{ if(confirm('Delete this entry?')) removeEntry(i)};
+        controls.appendChild(del);
+        div.appendChild(meta); div.appendChild(controls);
+        listEl.appendChild(div);
+      });
+      totalEl.textContent = fmtMoney(total);
+      // show hint when empty
+      if(entries.length===0){
+        listEl.innerHTML = '<div class="small" style="opacity:0.8">No entries yet for this month. Add your first expense above.</div>';
+      }
+    }
+
+    // Create entry from inputs
+    saveBtn.addEventListener('click', ()=>{
+      const amt = parseFloat(amount.value);
+      if(isNaN(amt) || amt<=0){ alert('Please enter a valid amount > 0'); return; }
+      if(!monthInput.value){ alert('Please choose a month'); return; }
+      const e = {
+        date: dateInput.value || (new Date()).toISOString().slice(0,10),
+        category: category.value,
+        amount: Number(amt).toFixed(2),
+        desc: desc.value || ''
+      };
+      addEntry(e);
+      // clear inputs except month
+      amount.value=''; desc.value='';
+      // small visual cue
+      saveBtn.textContent='Saved ✓';
+      setTimeout(()=>saveBtn.textContent='Save Expense',900);
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      amount.value=''; desc.value=''; dateInput.value = new Date().toISOString().slice(0,10);
+    });
+
+    monthInput.addEventListener('change', ()=>{ loadEntries(); });
+
+    // Excel export using SheetJS
+    downloadBtn.addEventListener('click', ()=>{
+      const entries = loadEntries();
+      if(entries.length===0){ alert('No entries to export for this month'); return; }
+      // prepare worksheet rows
+      const rows = entries.map(it=>({Date:it.date, Category:it.category, Amount:parseFloat(it.amount), Description:it.desc}));
+      // add totals row
+      const total = rows.reduce((s,r)=>s+(r.Amount||0),0);
+      rows.push({Date:'', Category:'Total', Amount:total, Description:''});
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Expenses');
+      const monthLabel = monthInput.value.replace('-','_');
+      XLSX.writeFile(wb, `expenses_${monthLabel}.xlsx`);
+    });
+
+    // initial render
+    loadEntries();
+
+    // Expose simple debug function (optional)
+    window._expense_debug = ()=>{ console.log('storage keys', Object.keys(localStorage)) }
+  </script>
+</body>
+</html>
